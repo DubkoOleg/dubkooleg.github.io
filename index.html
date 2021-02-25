@@ -45,7 +45,9 @@
           >Входные данные Request:</label
         >
         <textarea id="input" cols="2" rows="10" id="rules"> </textarea>
-        <label for="rules" id="ruleslabel">Выходной Json:</label>
+        <label for="rules" id="ruleslabel" title="JSON или изменённый запрос"
+          >Результат:</label
+        >
         <textarea id="output" cols="2" rows="12" id="rules"></textarea>
         <button class="convert" onclick="ConvertToJson()">Преобразовать</button>
       </div>
@@ -132,6 +134,7 @@
         let abckMatch = abckRegexp.exec(value);
         let abckOld = abckMatch[1];
         document.getElementById("input").value = value.replace(abckOld, abck);
+        Remove();
         document.getElementById("abck_input").value = "";
       }
       function Remove() {
