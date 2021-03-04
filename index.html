@@ -2,7 +2,7 @@
 <html lang="ru">
   <head>
     <meta charset="utf-8" />
-    <title>Helper for request</title>
+    <title>HelperToJson</title>
     <style type="text/css">
       textarea {
         width: 100%;
@@ -11,9 +11,6 @@
         padding: 20px;
       }
       .convert {
-        width: 100%;
-      }
-      .send {
         width: 100%;
       }
       .textwrapper {
@@ -26,7 +23,7 @@
   <body>
     <div style="display: block" id="rulesformitem" class="formitem">
       <button onclick="Clear()">Очистить</button>
-      <input id="abck_input" type="text" size="8" title="новая abck" />
+      <input id="abck_input" type="text" size="10" title="новая abck" />
       <button onclick="Replace()">Заменить abck</button>
       <input
         id="cookie_input"
@@ -45,9 +42,7 @@
           >Входные данные Request:</label
         >
         <textarea id="input" cols="2" rows="10" id="rules"> </textarea>
-        <label for="rules" id="ruleslabel" title="JSON или изменённый запрос"
-          >Результат:</label
-        >
+        <label for="rules" id="ruleslabel">Выходной Json:</label>
         <textarea id="output" cols="2" rows="12" id="rules"></textarea>
         <button class="convert" onclick="ConvertToJson()">Преобразовать</button>
       </div>
@@ -72,46 +67,42 @@
 
         let mainRegexp = /(.*) (http.*) HTTP\/1.1/g;
         let mainMatch = mainRegexp.exec(text);
-        resultString += `"Main":\n{\n"Method": "${mainMatch[1]}",\n"Url":"${mainMatch[2]}"\n}`;
+        resultString += `"Main":\n{\n"Method": "${mainMatch[1]}",\n"Link":"${mainMatch[2]}"\n}`;
 
-        let headersStrRegexp = /HTTP\/1.1((.|\n)+?)Cookie/g;
-        let headersStrMatch = headersStrRegexp.exec(text);
-        if (!headersStrMatch) {
-          headersStrMatch = /HTTP\/1.1((.|\n)+?)\n\n/g.exec(text);
+        let cookieStrRegexp = /Cookie: (.*)\n/g;
+        let cookieStrMatch = cookieStrRegexp.exec(text);
+        let cookieStr = cookieStrMatch[1];
+        let cookieRegexp = /(.+?)=(.*?);/g;
+        let cookieMatch = cookieRegexp.exec(cookieStr);
+        while (cookieMatch != null) {
+          result.cookies.push(
+            `"${cookieMatch[1].trim()}":"${cookieMatch[2].replaceAll(
+              '"',
+              '\\"'
+            )}"`
+          );
+          cookieMatch = cookieRegexp.exec(cookieStr);
         }
+        const resultCookiesString = `,\n"Cookies":\n{\n${result.cookies.join(
+          ",\n"
+        )}\n}\n`;
+        text = text.replace(cookieStrMatch[0], "");
+
+        let headersStrRegexp = /HTTP\/1.1((.|\n)+?)\n\n/g;
+        let headersStrMatch = headersStrRegexp.exec(text);
         let headersStr = headersStrMatch[1];
         let headersRegexp = /(.+?): (.+)/g;
         let headersMatch = headersRegexp.exec(headersStr);
         while (headersMatch != null) {
           //result.headers.push({ header: headersMatch[1], value: headersMatch[2] });
-          result.headers.push(`"${headersMatch[1]}":"${headersMatch[2]}"`);
+          result.headers.push(
+            `"${headersMatch[1]}":"${headersMatch[2].replaceAll('"', '\\"')}"`
+          );
           headersMatch = headersRegexp.exec(headersStr);
         }
         resultString += `,\n"Headers":\n{\n${result.headers.join(",\n")}\n}`;
 
-        let cookieStrRegexp = /Cookie: (.*)/g;
-        let cookieStrMatch = cookieStrRegexp.exec(text);
-        if (cookieStrMatch) {
-          let cookieStr = cookieStrMatch[1];
-          let cookieRegexp = /(.+?)=(.*?);/g;
-          let cookieMatch = cookieRegexp.exec(cookieStr);
-          while (cookieMatch != null) {
-            result.cookies.push(
-              `"${cookieMatch[1]
-                .trim()
-                .replace(/^"+|"+$/g, "")}":"${cookieMatch[2].replaceAll(
-                '"',
-                '\\"'
-              )}"`
-            );
-            cookieMatch = cookieRegexp.exec(cookieStr);
-          }
-          resultString += `,\n"Cookies":\n{\n${result.cookies.join(
-            ",\n"
-          )}\n}\n`;
-        } else {
-          resultString += `,\n"Cookies":\n{}\n`;
-        }
+        resultString += resultCookiesString;
 
         let bodyRegexp = /\n\n+(.*)/g;
         let bodymainMatch = bodyRegexp.exec(text);
@@ -134,7 +125,6 @@
         let abckMatch = abckRegexp.exec(value);
         let abckOld = abckMatch[1];
         document.getElementById("input").value = value.replace(abckOld, abck);
-        Remove();
         document.getElementById("abck_input").value = "";
       }
       function Remove() {
@@ -155,50 +145,8 @@
         });
         document.getElementById("comments").innerHTML += removed.join(", ");
 
-        document.getElementById("output").value = value;
+        document.getElementById("input").value = value;
       }
-
-      /*function Send() {
-        ConvertToJson();
-
-        let jsonStr = document.getElementById("output").value;
-        let json = JSON.parse(jsonStr);
-
-        let text = document.getElementById("input").value;
-        let cookieStrRegexp = /Cookie: (.*)/g;
-        let cookieStrMatch = cookieStrRegexp.exec(text);
-
-        document.cookie = "cookie1=test, expires=Sun, test=sef";
-        document.cookie = "cookie1=test2,expires=Sun,test=sef";
-        document.cookie = cookieStrMatch[1];
-        createCookie("testtt", "valll");
-
-        sendData(json.Main.Url, json.Main.Method, json.Headers, {}).then(
-          (data) => {
-            console.log(data); // JSON data parsed by `response.json()` call
-          }
-        );
-      }
-      
-      async function sendData(url = "", method = "", headers = {}, data = {}) {
-        // Default options are marked with *
-        try {
-          const response = await fetch(url, {
-            method: "GET", // *GET, POST, PUT, DELETE, etc.
-            mode: "no-cors", // no-cors, *cors, same-origin
-            //cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
-            credentials: "include", // include, *same-origin, omit
-            headers: headers,
-            //redirect: "follow", // manual, *follow, error
-            //referrerPolicy: "no-referrer", // no-referrer, *client
-            //body: JSON.stringify(data), // body data type must match "Content-Type" header
-          });
-          return await response.json(); // parses JSON response into native JavaScript objects
-        } catch (error) {
-          console.error("Ошибка:", error);
-          debugger;
-        }
-      }*/
     </script>
   </body>
 </html>
