@@ -61,40 +61,53 @@
     </div>
     <script type="text/javascript">
       function ConvertToJson() {
-        let result = { request: "", headers: [], cookies: [], bodyValues: [] };
+        const result = { request: "", linkParams: [], headers: [], cookies: [], bodyValues: [] };
         let text = document.getElementById("input").value;
         let resultString = "{\n";
 
-        let mainRegexp = /(.*) (http.*) HTTP\/1.1/g;
-        let mainMatch = mainRegexp.exec(text);
-        resultString += `"Main":\n{\n"Method": "${mainMatch[1]}",\n"Link":"${mainMatch[2]}"\n}`;
+        const mainRegexp = /(.*) (http.*) HTTP\/1.1/g;
+        const mainMatch = mainRegexp.exec(text);
+        resultString += `"Main":\n{\n"Method": "${mainMatch[1]}",\n"Link":"${mainMatch[2]}"`;
+        
+        const linkParamsStrRegexp = /\?(.*)/g;
+        const linkParamsStrMatch = linkParamsStrRegexp.exec(mainMatch[2]);
+        if(linkParamsStrMatch != null) {
+          const linkParamsStr = linkParamsStrMatch[1]
+          const linkParamsRegexp = /(.+?)=(.*?)(&|$)/g;
+          let linkParamsMatch = linkParamsRegexp.exec(linkParamsStr);
+          if (linkParamsMatch[1]){
+            while (linkParamsMatch != null) {
+              result.linkParams.push(`"${linkParamsMatch[1]}":"${linkParamsMatch[2]}"`);
+              linkParamsMatch = linkParamsRegexp.exec(linkParamsStr);
+            }
+            resultString += `,\n"LinkParams":\n{\n${result.linkParams.join(",\n")}\n}`;
+          }
+        }
+        resultString += '\n}';
 
-        let cookieStrRegexp = /Cookie: (.*)\n/g;
-        let cookieStrMatch = cookieStrRegexp.exec(text);
+        const cookieStrRegexp = /Cookie: (.*)\n/g;
+        const cookieStrMatch = cookieStrRegexp.exec(text);
         let resultCookiesString
         if(cookieStrMatch != null){
-          let cookieStr = cookieStrMatch[1];
-          let cookieRegexp = /(.+?)=(.*?);/g;
+          const cookieStr = cookieStrMatch[1];
+          const cookieRegexp = /(.+?)=(.*?);/g;
           let cookieMatch = cookieRegexp.exec(cookieStr);
           while (cookieMatch != null) {
             result.cookies.push(`"${cookieMatch[1].trim()}":"${cookieMatch[2].replaceAll('"','\\"')}"`);
             cookieMatch = cookieRegexp.exec(cookieStr);
           }
-          resultCookiesString = `,\n"Cookies":\n{\n${result.cookies.join(
-            ",\n"
-          )}\n}\n`;
+          resultCookiesString = `,\n"Cookies":\n{\n${result.cookies.join(",\n")}\n}\n`;
           text = text.replace(cookieStrMatch[0], "");
         } else{
           resultCookiesString=',\n"Cookies":\n{\n}\n';
         }
 		
-        let headersStrRegexp = /HTTP\/1.1((.|\n)+?)\n\n/g;
-        let headersStrMatch = headersStrRegexp.exec(text);
-        let headersStr = headersStrMatch[1];
-        let headersRegexp = /(.+?): (.+)/g;
+        const headersStrRegexp = /HTTP\/1.1((.|\n)+?)\n\n/g;
+        const headersStrMatch = headersStrRegexp.exec(text);
+        const headersStr = headersStrMatch[1];
+        const headersRegexp = /(.+?): (.+)/g;
         let headersMatch = headersRegexp.exec(headersStr);
         while (headersMatch != null) {
-          //result.headers.push({ header: headersMatch[1], value: headersMatch[2] });
           result.headers.push(
             `"${headersMatch[1]}":"${headersMatch[2].replaceAll('"', '\\"')}"`
           );
@@ -104,12 +117,12 @@
 
         resultString += resultCookiesString;
 
-        let bodyRegexp = /\n\n+(.*)/g;
-        let bodyMainMatch = bodyRegexp.exec(text);
+        const bodyRegexp = /\n\n+(.*)/g;
+        const bodyMainMatch = bodyRegexp.exec(text);
         if (bodyMainMatch[1]) {
-          let val = bodyMainMatch[1].trim();
+          const val = bodyMainMatch[1].trim();
           
-          let bodyValueRegexp = /(.+?)=(.*?)(&|$)/g;
+          const bodyValueRegexp = /(.+?)=(.*?)(&|$)/g;
           let bodyValueMatch = bodyValueRegexp.exec(val);
           if (bodyValueMatch[1]){
             while (bodyValueMatch != null) {
@@ -131,26 +144,26 @@
         document.getElementById("output").value = "";
       }
       function Replace() {
-        let abck = document.getElementById("abck_input").value;
-        let value = document.getElementById("input").value;
-        let abckRegexp = /_abck=(.*);?/g;
-        let abckMatch = abckRegexp.exec(value);
-        let abckOld = abckMatch[1];
+        const abck = document.getElementById("abck_input").value;
+        const value = document.getElementById("input").value;
+        const abckRegexp = /_abck=(.*);?/g;
+        const abckMatch = abckRegexp.exec(value);
+        const abckOld = abckMatch[1];
         document.getElementById("input").value = value.replace(abckOld, abck);
         document.getElementById("abck_input").value = "";
       }
       function Remove() {
-        let nameStrCoockies = document.getElementById("cookie_input").value;
-        let value = document.getElementById("input").value;
+        const nameStrCoockies = document.getElementById("cookie_input").value;
+        const value = document.getElementById("input").value;
 
-        let nameCoockies = nameStrCoockies.split(",");
+        const nameCoockies = nameStrCoockies.split(",");
         document.getElementById("comments").innerHTML = "Удалены куки: ";
-        let removed = [];
+        const removed = [];
         nameCoockies.forEach((nameCoockie) => {
-          let findRegexp = new RegExp(`${nameCoockie.trim()}=(.*?)(;|\n)`, "g");
-          let findMatch = findRegexp.exec(value);
+          const findRegexp = new RegExp(`${nameCoockie.trim()}=(.*?)(;|\n)`, "g");
+          const findMatch = findRegexp.exec(value);
           if (findMatch) {
-            let findText = findMatch[0];
+            const findText = findMatch[0];
             value = value.replace(findText.replace("\n", ""), "");
             removed.push(nameCoockie);
           }
