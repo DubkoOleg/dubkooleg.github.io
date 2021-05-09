@@ -136,6 +136,8 @@
 
         resultString += "}";
         document.getElementById("output").value = resultString;
+		
+		CopyResults()
       }
 
 
@@ -169,8 +171,13 @@
           }
         });
         document.getElementById("comments").innerHTML += removed.join(", ");
-
         document.getElementById("input").value = value;
+      }
+      function CopyResults() {
+        const copyText = document.getElementById("output");
+        copyText.select();
+        copyText.setSelectionRange(0, 99999)
+        document.execCommand("copy");
       }
     </script>
   </body>
