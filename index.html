@@ -170,7 +170,7 @@
       }
       function Remove() {
         const nameStrCoockies = document.getElementById("cookie_input").value;
-        const value = document.getElementById("input").value;
+        let value = document.getElementById("input").value;
 
         const nameCoockies = nameStrCoockies.split(",");
         document.getElementById("comments").innerHTML = "Удалены куки: ";
