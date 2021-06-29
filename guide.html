@@ -1,0 +1,68 @@
+<html>
+<head>
+
+<style>
+.reg_from {background-color: antiquewhite;}
+.reg_to {background-color: aliceblue;}
+.text {padding: 0 20;white-space: pre-wrap;}
+</style>
+</head>
+<body>
+<div>
+<h2>Notepad++<h2>
+
+<h3>Регулярки</h3>
+<ul>
+<li>Преобразовать список headers в поля json: <span class="text reg_from">(.+?): (.+)</span> → <span span class="text reg_to">"\1":"\2",</span></li>
+<li>Убрать атрибуты у response: <span span class="text reg_from">[JsonConverter(typeof(PurpleParseStringConverter))]\r\n        public long?</span> → <span span class="text reg_to">public string</span></li>
+<li>Поиск логов в платформе: <span class="text reg_from">SourceContext: /Cle.GapGate.*/</span></li>
+</ul>
+
+<h3>HotKey</h3>
+<ul>
+<li>Перейти к парной скобке: <span class="text">Ctrl+B</span></li>
+<li>Есть очень быстрый поиск по файлам - помогает, когда глючит поик в студии или в поиске необходимо использовать регулярки</li>
+</ul>
+
+<hr/>
+<h2>Полезные сайты</h2>
+<ul>
+<li><a target="_blank" rel="noopener noreferrer" href="https://app.quicktype.io/">Json в C# class</a></li>
+<li><a target="_blank" rel="noopener noreferrer" href="http://text.num2word.ru/">Сравнение текстов</a></li>
+<li><a target="_blank" rel="noopener noreferrer" href="https://jsoneditoronline.org/">Сравнение и просмотр Json</a></li>
+<li><a target="_blank" rel="noopener noreferrer" href="https://regex101.com/">Регулярки с возможностью наименования групп</a></li>
+<li><a target="_blank" rel="noopener noreferrer" href="https://www.guidgenerator.com/">Guid генератор</a></li>
+<li><a target="_blank" rel="noopener noreferrer" href="https://convertcase.net/ru/">Изменение регистра</a></li>
+<li><a target="_blank" rel="noopener noreferrer" href="https://www.urldecoder.org/">Декодирование и кодирование</a></li>
+</ul>
+
+<hr/>
+<h2>Хелперы</h2>
+
+<h3>Коллекции</h3>
+<p style="margin: 0 20px;color: gray;">cle.common.libs Cle.Helper.CollectionHelper</p>
+<ul>
+<li>Distinct по полю: <span class="text">DistinctBy</span></li>
+<li>Взять элемент с минимальным значением свойства: <span class="text">MinByField</span></li>
+<li>Преобразовать AsyncEnumerator в List: <span class="text">ToList</span></li>
+</ul>
+
+<h3>String</h3>
+<p style="margin: 0 20px;color: gray;">cle.common.libs Cle.Helper.StringExtension</p>
+<ul>
+<li>Случайный набор символов (можно задать словарь): <span class="text">RandomString</span></li>
+<li>Взять элемент с минимальным значением свойства: <span class="text">MinByField</span></li>
+<li>Преобразовать AsyncEnumerator в List: <span class="text">ToList</span></li>
+</ul>
+
+<h3>Данные</h3>
+<p style="margin: 0 20px;color: gray;">cle.platformservices Cle.Gate.Helper.DataParseHelper</p>
+<ul>
+<li>Преобразование к числовой цене: <span class="text">ParseCurrency()</span></li>
+</ul>
+
+</div>
+<hr/>
+<a style="margin: 20px;display: block;" href="">Обратно</a>
+</body>
+</html>
