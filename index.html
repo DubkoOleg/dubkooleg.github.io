@@ -113,7 +113,7 @@
         const headersStr = headersStrMatch[1];
         const headersRegexp = /(.+?): (.+)/g;
         let headersMatch = headersRegexp.exec(headersStr);
-        const autoCreatedHeaders = ["Connection", "User-Agent", "sec-ch-ua", "sec-ch-ua-mobile", "Accept-Language", "Accept-Encoding", "Origin"];
+        const autoCreatedHeaders = ["Connection", "User-Agent", "sec-ch-ua", "sec-ch-ua-mobile", "sec-ch-ua-platform", "Accept-Language", "Accept-Encoding", "Origin"];
         const removeAutoCreatedHeaders = document.getElementById("autoCreatedHeaders").checked;
         while (headersMatch != null) {
           if(!removeAutoCreatedHeaders || !autoCreatedHeaders.includes(headersMatch[1])){
