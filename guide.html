@@ -17,7 +17,7 @@
 <h3>Регулярки</h3>
 <ul>
 <li>Преобразовать список headers в поля json: <span class="text reg_from">(.+?): (.+)</span> → <span span class="text reg_to">"\1":"\2",</span></li>
-<li>Убрать атрибуты у response: <span span class="text reg_from">[JsonConverter(typeof(PurpleParseStringConverter))]\r\n        public long?</span> → <span span class="text reg_to">public string</span></li>
+<li>Убрать атрибуты у response: <span span class="text reg_from">\[JsonConverter\(typeof\(ParseStringConverter\)\)\]\r\n        public long\?</span> → <span span class="text reg_to">public string</span></li>
 <li>Поиск логов в платформе: <span class="text reg_from">SourceContext: /Cle.GapGate.*/</span></li>
 </ul>
 
@@ -65,6 +65,13 @@
 <ul>
 <li>Преобразование телефона к числу и формату: <span class="text">ParseUSPhoneNumber()</span><span style="color: gray;">пример форматирования: $1-$2-$3</span></li>
 <li>Сравнение дробных цен: <span class="text">PriceAlmostEqualTo()</span></li>
+</ul>
+
+<h3>Html</h3>
+<p style="margin: 0 20px;color: gray;">cle.common.libs Cle.Helper.HtmlDocHelper</p>
+<ul>
+<li>Удалить все лишние тэги из html(особенно удобно для Description): <span class="text">RemoveHtmlTags()</span></li>
+<li>Взять json из скрипта (если кроме него в нём ничего нет): <span class="text">ParseJsonFromScript()</span></li>
 </ul>
 
 <h3>Данные</h3>
