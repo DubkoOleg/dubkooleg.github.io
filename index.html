@@ -132,7 +132,7 @@
         if (bodyMainMatch != null && bodyMainMatch[1]) {
           const val = bodyMainMatch[1].trim();
           
-          const bodyValueRegexp = /(.+?)=(.*?)(&|$)/g;
+          /*const bodyValueRegexp = /(.+?)=(.*?)(&|$)/g;
           let bodyValueMatch = bodyValueRegexp.exec(val);
           if (bodyValueMatch != null){
             while (bodyValueMatch != null) {
@@ -140,14 +140,14 @@
               bodyValueMatch = bodyValueRegexp.exec(val);
             }
             resultString += `,\n"BodyValues":\n{\n${result.bodyValues.join(",\n")}\n}\n`;
-          }
+          }*/
           resultString += `,\n"Body":\n${val[0] == "{" ? val : `"${val}"`}`;
         }
 
         resultString += "}";
         document.getElementById("output").value = resultString;
 		
-		CopyResults()
+	CopyResults()
       }
 
 
