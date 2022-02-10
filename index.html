@@ -67,87 +67,17 @@
     </div>
     <script type="text/javascript">
       function ConvertToJson() {
-        const result = { request: "", linkParams: [], headers: [], cookies: [], bodyValues: [] };
-        let text = document.getElementById("input").value;
-        let resultString = "{\n";
-
-        const mainRegexp = /(.*) (http.*) HTTP\/1.1/g;
-        const mainMatch = mainRegexp.exec(text);
-        resultString += `"Main":\n{\n"Method": "${mainMatch[1]}",\n"Link":"${mainMatch[2]}"`;
-        
-        const linkParamsStrRegexp = /\?(.*)/g;
-        const linkParamsStrMatch = linkParamsStrRegexp.exec(mainMatch[2]);
-        if(linkParamsStrMatch != null) {
-          const linkParamsStr = linkParamsStrMatch[1]
-          const linkParamsRegexp = /(.+?)=(.*?)(&|$)/g;
-          let linkParamsMatch = linkParamsRegexp.exec(linkParamsStr);
-          if (linkParamsMatch[1]){
-            while (linkParamsMatch != null) {
-              result.linkParams.push(`"${linkParamsMatch[1]}":"${linkParamsMatch[2]}"`);
-              linkParamsMatch = linkParamsRegexp.exec(linkParamsStr);
-            }
-            resultString += `,\n"LinkParams":\n{\n${result.linkParams.join(",\n")}\n}`;
-          }
-        }
-        resultString += '\n}';
-
-        const cookieStrRegexp = /Cookie: (.*)\n/g;
-        const cookieStrMatch = cookieStrRegexp.exec(text);
-        let resultCookiesString
-        if(cookieStrMatch != null){
-          const cookieStr = cookieStrMatch[1];
-          const cookieRegexp = /(.+?)=(.*?)(;|$)/g;
-          let cookieMatch = cookieRegexp.exec(cookieStr);
-          while (cookieMatch != null) {
-            result.cookies.push(`"${cookieMatch[1].trim()}":"${cookieMatch[2].replaceAll('"','\\"')}"`);
-            cookieMatch = cookieRegexp.exec(cookieStr);
-          }
-          resultCookiesString = `,\n"Cookies":\n{\n${result.cookies.join(",\n")}\n}\n`;
-          text = text.replace(cookieStrMatch[0], "");
-        } else{
-          resultCookiesString=',\n"Cookies":\n{\n}\n';
-        }
+        let text = document.getElementById("input").value.trimStart();
 		
-        const headersStrRegexp = /HTTP\/1.1((.|\n)+?)\n\n/g;
-        const headersStrMatch = headersStrRegexp.exec(text);
-        const headersStr = headersStrMatch[1];
-        const headersRegexp = /(.+?): (.+)/g;
-        let headersMatch = headersRegexp.exec(headersStr);
-        const autoCreatedHeaders = ["Connection", "User-Agent", "sec-ch-ua", "sec-ch-ua-mobile", "sec-ch-ua-platform", "Accept-Language", "Accept-Encoding", "Origin"];
-        const removeAutoCreatedHeaders = document.getElementById("autoCreatedHeaders").checked;
-        while (headersMatch != null) {
-          if(!removeAutoCreatedHeaders || !autoCreatedHeaders.includes(headersMatch[1])){
-            result.headers.push(
-              `"${headersMatch[1]}":"${headersMatch[2].replaceAll('"', '\\"')}"`
-            );
-          }
-          headersMatch = headersRegexp.exec(headersStr);
-        }
-        resultString += `,\n"Headers":\n{\n${result.headers.join(",\n")}\n}`;
-
-        resultString += resultCookiesString;
-
-        const bodyRegexp = /\n\n+(.*)/g;
-        const bodyMainMatch = bodyRegexp.exec(text);
-        if (bodyMainMatch != null && bodyMainMatch[1]) {
-          const val = bodyMainMatch[1].trim();
-          
-          /*const bodyValueRegexp = /(.+?)=(.*?)(&|$)/g;
-          let bodyValueMatch = bodyValueRegexp.exec(val);
-          if (bodyValueMatch != null){
-            while (bodyValueMatch != null) {
-              result.bodyValues.push(`"${bodyValueMatch[1].trim()}":"${bodyValueMatch[2].replaceAll('"','\\"')}"`);
-              bodyValueMatch = bodyValueRegexp.exec(val);
-            }
-            resultString += `,\n"BodyValues":\n{\n${result.bodyValues.join(",\n")}\n}\n`;
-          }*/
-          resultString += `,\n"Body":\n${val[0] == "{" ? val : `"${val}"`}`;
-        }
-
-        resultString += "}";
+		    const resultString = text.startsWith('HTTP') ? 
+          GetResultStringFromResponse(text) : 
+          text.slice(0, text.indexOf('\n')).endsWith('1.1') ? 
+            GetResultStringFromRequest(text) : 
+            'undefined format';
+		
         document.getElementById("output").value = resultString;
 		
-	CopyResults()
+		    CopyResults()
       }
 
 
@@ -190,6 +120,148 @@
 	    copyText.setSelectionRange(0, 99999)
 	    document.execCommand("copy");
 	  }
+
+    function GetResultStringFromRequest(text) {
+      const result = { request: "", linkParams: [], headers: [], cookies: [], bodyValues: [] };
+      let resultString = "{\n";
+
+      const mainRegexp = /(.*) (http.*) HTTP\/1.1/g;
+      const mainMatch = mainRegexp.exec(text);
+      resultString += `"Main":\n{\n"Method": "${mainMatch[1]}",\n"Link":"${mainMatch[2]}"`;
+
+      const linkParamsStrRegexp = /\?(.*)/g;
+      const linkParamsStrMatch = linkParamsStrRegexp.exec(mainMatch[2]);
+      if(linkParamsStrMatch != null) {
+        const linkParamsStr = linkParamsStrMatch[1]
+        const linkParamsRegexp = /(.+?)=(.*?)(&|$)/g;
+        let linkParamsMatch = linkParamsRegexp.exec(linkParamsStr);
+        if (linkParamsMatch[1]){
+          while (linkParamsMatch != null) {
+            result.linkParams.push(`"${linkParamsMatch[1]}":"${linkParamsMatch[2]}"`);
+            linkParamsMatch = linkParamsRegexp.exec(linkParamsStr);
+          }
+          resultString += `,\n"LinkParams":\n{\n${result.linkParams.join(",\n")}\n}`;
+        }
+      }
+      resultString += '\n}';
+
+      const cookieStrRegexp = /Cookie: (.*)\n/g;
+      const cookieStrMatch = cookieStrRegexp.exec(text);
+      let resultCookiesString
+      if(cookieStrMatch != null){
+        const cookieStr = cookieStrMatch[1];
+        const cookieRegexp = /(.+?)=(.*?)(;|$)/g;
+        let cookieMatch = cookieRegexp.exec(cookieStr);
+        while (cookieMatch != null) {
+          result.cookies.push(`"${cookieMatch[1].trim()}":"${cookieMatch[2].replaceAll('"','\\"')}"`);
+          cookieMatch = cookieRegexp.exec(cookieStr);
+        }
+        resultCookiesString = `,\n"Cookies":\n{\n${result.cookies.join(",\n")}\n}\n`;
+        text = text.replace(cookieStrMatch[0], "");
+      } else{
+        resultCookiesString=',\n"Cookies":\n{\n}\n';
+      }
+
+      const headersStrRegexp = /HTTP\/1.1((.|\n)+?)\n\n/g;
+      const headersStrMatch = headersStrRegexp.exec(text);
+      const headersStr = headersStrMatch[1];
+      const headersRegexp = /(.+?): (.+)/g;
+      let headersMatch = headersRegexp.exec(headersStr);
+      const autoCreatedHeaders = ["Connection", "User-Agent", "sec-ch-ua", "sec-ch-ua-mobile", "sec-ch-ua-platform", "Accept-Language", "Accept-Encoding", "Origin"];
+      const removeAutoCreatedHeaders = document.getElementById("autoCreatedHeaders").checked;
+      while (headersMatch != null) {
+        if(!removeAutoCreatedHeaders || !autoCreatedHeaders.includes(headersMatch[1])){
+          result.headers.push(
+            `"${headersMatch[1]}":"${headersMatch[2].replaceAll('"', '\\"')}"`
+          );
+        }
+        headersMatch = headersRegexp.exec(headersStr);
+      }
+      resultString += `,\n"Headers":\n{\n${result.headers.join(",\n")}\n}`;
+
+      resultString += resultCookiesString;
+
+      const bodyRegexp = /\n\n+(.*)/g;
+      const bodyMainMatch = bodyRegexp.exec(text);
+      if (bodyMainMatch != null && bodyMainMatch[1]) {
+        const val = bodyMainMatch[1].trim();
+        
+        /*const bodyValueRegexp = /(.+?)=(.*?)(&|$)/g;
+        let bodyValueMatch = bodyValueRegexp.exec(val);
+        if (bodyValueMatch != null){
+          while (bodyValueMatch != null) {
+            result.bodyValues.push(`"${bodyValueMatch[1].trim()}":"${bodyValueMatch[2].replaceAll('"','\\"')}"`);
+            bodyValueMatch = bodyValueRegexp.exec(val);
+          }
+          resultString += `,\n"BodyValues":\n{\n${result.bodyValues.join(",\n")}\n}\n`;
+        }*/
+        resultString += `,\n"Body":\n${val[0] == "{" ? val : `"${val}"`}`;
+      }
+
+      resultString += "}";
+      return resultString;
+    }
+
+    function GetResultStringFromResponse(text) {
+      let resultString = "{\n";
+
+      const duplicateNewLineRegexp = /\n\n+/gm;
+      const bodyRegexp = /\n\n+(.*)/g;
+      const bodyMainMatch = bodyRegexp.exec(text);
+      const hasBody = bodyMainMatch != null && bodyMainMatch[1];
+      // if (hasBody) {
+      //   const val = bodyMainMatch[1].trim();
+      // }
+
+      let topText = hasBody ? text.slice(0, bodyMainMatch.index) : text;
+      
+      const resultRegexp = /HTTP\/1\.1 ?(.+)$/gm;
+      const resultMatch = resultRegexp.exec(topText);
+      resultString += `"Result":\n"${resultMatch[1].trim()}"\n`;
+
+      const setCookiesRegexp = /^Set-Cookie: ?(.+?)=(.+)$/gm;
+      let setCookiesMatch = setCookiesRegexp.exec(topText);     
+      let cookies = []; 
+      while (setCookiesMatch != null) {
+        cookies.push(`"${setCookiesMatch[1].trim()}":"${setCookiesMatch[2].replaceAll('"','\\"')}"`);
+        //topText = topText.slice(0, setCookiesMatch.index) + topText.slice(setCookiesMatch.index+setCookiesMatch[0].length+1);
+        setCookiesMatch = setCookiesRegexp.exec(topText);
+      }
+      if (cookies.length !== 0){
+        topText = topText.replaceAll(setCookiesRegexp, '');
+        topText = topText.replaceAll(duplicateNewLineRegexp, '\n');
+        resultString += `,"Set-Cookies":\n{\n${cookies.join(",\n")}\n}\n`;
+      }
+
+      const headersRegexp = /^(.+?): ?(.+)$/gm;
+      let headersMatch = headersRegexp.exec(topText);     
+      let headers = []; 
+      while (headersMatch != null) {
+        headers.push(`"${headersMatch[1].trim()}":"${headersMatch[2].replaceAll('"','\\"')}"`);
+        //topText = topText.slice(0, headersMatch.index) + topText.slice(headersMatch.index+headersMatch[0].length+1);
+        headersMatch = headersRegexp.exec(topText);
+      }
+      if (headers.length !== 0){
+        topText = topText.replaceAll(headersRegexp, '');
+        topText = topText.replaceAll(duplicateNewLineRegexp, '\n');
+        resultString += `,"Headers":\n{\n${headers.join(",\n")}\n}\n`;
+      }
+
+      if (hasBody) 
+        resultString += `,"Body":\n${bodyMainMatch[1].trim()}\n`;
+
+      const other = topText.split('\n)');
+      if(other.length>2){
+        let others = [];
+        for(let i = 1; i < other.length-1; i++){
+          others.push(`"${i}":"${other[i]}"`);
+        }
+        resultString += `,"Other":\n{\n${others.join(",\n")}\n}\n`;
+      }
+
+      resultString += "}";
+      return resultString;
+    }
    
     </script>
   </body>
