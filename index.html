@@ -162,7 +162,7 @@
         resultCookiesString=',\n"Cookies":\n{\n}\n';
       }
 
-      const headersStrRegexp = /HTTP\/1.1((.|\n)+?)\n\n/g;
+      const headersStrRegexp = /HTTP\/1\.1((.|\n)+?)\n(\n|$)/g;
       const headersStrMatch = headersStrRegexp.exec(text);
       const headersStr = headersStrMatch[1];
       const headersRegexp = /(.+?): (.+)/g;
