@@ -131,7 +131,7 @@
 
       const linkParamsStrRegexp = /\?(.*)/g;
       const linkParamsStrMatch = linkParamsStrRegexp.exec(mainMatch[2]);
-      if(linkParamsStrMatch != null) {
+      if(linkParamsStrMatch != null && linkParamsStrMatch[1]) {
         const linkParamsStr = linkParamsStrMatch[1]
         const linkParamsRegexp = /(.+?)=(.*?)(&|$)/g;
         let linkParamsMatch = linkParamsRegexp.exec(linkParamsStr);
