@@ -150,15 +150,19 @@
       let resultCookiesString
       if(cookieStrMatch != null){
         const cookieStr = cookieStrMatch[1];
-        const cookieRegexp = /(.+?)=(.*?)(;|$)/g;
-        let cookieMatch = cookieRegexp.exec(cookieStr);
-        while (cookieMatch != null) {
-          result.cookies.push(`"${cookieMatch[1].trim()}":"${cookieMatch[2].replaceAll('"','\\"')}"`);
-          cookieMatch = cookieRegexp.exec(cookieStr);
+		
+        const cookiesTest = cookieStr.split(';');
+        for (cookieTest of cookiesTest){
+          const cookieTestValues = cookieTest.split('=');
+          if (cookieTestValues.length > 1){				
+            result.cookies.push(`"${cookieTestValues[0].trim()}":"${cookieTestValues[1].replaceAll('"','\\"')}"`);
+          }else{			
+            result.cookies.push(`"${cookieTestValues[0].trim()}":""`);
+          }
         }
         resultCookiesString = `,\n"Cookies":\n{\n${result.cookies.join(",\n")}\n}\n`;
         text = text.replace(cookieStrMatch[0], "");
-      } else{
+      } else {
         resultCookiesString=',\n"Cookies":\n{\n}\n';
       }
 
