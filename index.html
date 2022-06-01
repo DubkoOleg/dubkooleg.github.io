@@ -1,125 +1,168 @@
 <!DOCTYPE html>
 <html lang="ru">
-  <head>
-    <meta charset="utf-8" />
-    <title>HelperToJson</title>
-    <style type="text/css">
-      textarea {
-        width: 100%;
-      }
-      button {
-        padding: 20px;
-      }
-      .convert {
-        width: 100%;
-      }
-      .textwrapper {
-        border: 1px solid #999999;
-        margin: 5px 0;
-        padding: 3px;
-      }
-    </style>
-  </head>
-  <body>
-    <div style="display: block" id="rulesformitem" class="formitem">
-      <button onclick="Clear()">Очистить</button>
-      <input id="abck_input" type="text" size="10" title="новая abck" />
-      <button onclick="Replace()">Заменить abck</button>
-      <input
-        id="cookie_input"
-        type="text"
-        size="60"
-        title="Имена удаляемых кук через запятую"
-      />
-      <button onclick="Remove()">Удалить</button>
-      <div style="margin-left: 10px;display: inline-block;vertical-align: middle;">
-        <label
-          for="autoCreatedHeaders"
-          id="autoCreatedHeaderslabel"
-          title="Origin; Connection; User-Agent; sec-ch-ua; sec-ch-ua-mobile; Accept-Language; Accept-Encoding"
-          style="width: 150px;word-wrap: break-word;display: inline-block;"
-          >Убрать автогененрируемые хедеры
-        </label>
-        <input id="autoCreatedHeaders" type="checkbox" name="autoCreatedHeaders" checked style="float: left;"></input>
-      </div>
-      <input type="text" size="20" title="Для заметок" style="float: right" />
-      <p id="comments"></p>
-      <div class="textwrapper">
-        <label
-          for="rules"
-          id="ruleslabel"
-          title="Данные request из Fidler вкладки Raw"
-          >Входные данные Request:</label
-        >
-        <textarea id="input" cols="2" rows="10" id="rules"> </textarea>
-        <label for="rules" id="ruleslabel">Выходной Json:</label>
-        <textarea id="output" cols="2" rows="12" id="rules"></textarea>
-        <button class="convert" onclick="ConvertToJson()">Преобразовать и скопировать</button>
-      </div>
-      <p>
-        Сайт для сравнения JSON:
-        <a target="_blank" rel="noopener noreferrer"
-          href="https://jsoneditoronline.org/#left=local.suqade&right=local.nibota">jsoneditoronline.org</a>
-      </p>
-      <p>
-        <a href="guide.html">Справочная информация</a>
-      </p>
+
+<head>
+  <meta charset="utf-8" />
+  <title>HelperToJson</title>
+  <style type="text/css">
+    textarea {
+      width: 100%;
+    }
+
+    button {
+      padding: 20px;
+    }
+
+    .convert {
+      width: 100%;
+    }
+
+    .textwrapper {
+      border: 1px solid #999999;
+      margin: 5px 0;
+      padding: 3px;
+    }
+  </style>
+</head>
+
+<body>
+  <div style="display: block" id="rulesformitem" class="formitem">
+    <button onclick="Clear()">Очистить</button>
+    <input id="abck_input" type="text" size="10" title="новая abck" />
+    <button onclick="Replace()">Заменить abck</button>
+    <input id="cookie_input" type="text" size="60" title="Имена кук через запятую" />
+    <button onclick="Remove()">Удалить</button>
+    <button onclick="Leave()">Оставить</button>
+    <div style="margin-left: 10px;display: inline-block;vertical-align: middle;">
+      <label for="autoCreatedHeaders" id="autoCreatedHeaderslabel"
+        title="Origin; Connection; User-Agent; sec-ch-ua; sec-ch-ua-mobile; Accept-Language; Accept-Encoding"
+        style="width: 150px;word-wrap: break-word;display: inline-block;">Убрать автогененрируемые хедеры
+      </label>
+      <input id="autoCreatedHeaders" type="checkbox" name="autoCreatedHeaders" checked style="float: left;"></input>
     </div>
-    <script type="text/javascript">
-      function ConvertToJson() {
-        let text = document.getElementById("input").value.trimStart();
-		
-		    const resultString = text.startsWith('HTTP') ? 
-          GetResultStringFromResponse(text) : 
-          text.slice(0, text.indexOf('\n')).endsWith('1.1') ? 
-            GetResultStringFromRequest(text) : 
-            'undefined format';
-		
-        document.getElementById("output").value = resultString;
-		
-		    CopyResults()
-      }
+    <input type="text" size="20" title="Для заметок" style="float: right" />
+    <p id="comments" style="width: 90vw;"></p>
+    <p id="comments2" style="width: 90vw;"></p>
+    <div class="textwrapper">
+      <label for="rules" id="ruleslabel" title="Данные request из Fidler вкладки Raw">Входные данные Request:</label>
+      <textarea id="input" cols="2" rows="10" id="rules"> </textarea>
+      <label for="rules" id="ruleslabel">Выходной Json:</label>
+      <textarea id="output" cols="2" rows="12" id="rules"></textarea>
+      <button class="convert" onclick="ConvertToJson()">Преобразовать и скопировать</button>
+    </div>
+    <p>
+      Сайт для сравнения JSON:
+      <a target="_blank" rel="noopener noreferrer"
+        href="https://jsoneditoronline.org/#left=local.suqade&right=local.nibota">jsoneditoronline.org</a>
+    </p>
+    <p>
+      <a href="guide.html">Справочная информация</a>
+    </p>
+  </div>
+  <script type="text/javascript">
+    function ConvertToJson() {
+      let text = document.getElementById("input").value.trimStart();
+
+      const resultString = text.startsWith('HTTP') ?
+        GetResultStringFromResponse(text) :
+        text.slice(0, text.indexOf('\n')).endsWith('1.1') ?
+          GetResultStringFromRequest(text) :
+          'undefined format';
+
+      document.getElementById("output").value = resultString;
+
+      CopyResults()
+    }
 
 
-      function Clear() {
-        document.getElementById("input").value = "";
-        document.getElementById("output").value = "";
-      }
-      function Replace() {
-        const abck = document.getElementById("abck_input").value;
-        const value = document.getElementById("input").value;
-        const abckRegexp = /_abck=(.*);?/g;
-        const abckMatch = abckRegexp.exec(value);
-        const abckOld = abckMatch[1];
-        document.getElementById("input").value = value.replace(abckOld, abck);
-        document.getElementById("abck_input").value = "";
-      }
-      function Remove() {
-        const nameStrCoockies = document.getElementById("cookie_input").value;
-        let value = document.getElementById("input").value;
+    function Clear() {
+      document.getElementById("input").value = "";
+      document.getElementById("output").value = "";
+    }
+    function Replace() {
+      const abck = document.getElementById("abck_input").value;
+      const value = document.getElementById("input").value;
+      const abckRegexp = /_abck=(.*);?/g;
+      const abckMatch = abckRegexp.exec(value);
+      const abckOld = abckMatch[1];
+      document.getElementById("input").value = value.replace(abckOld, abck);
+      document.getElementById("abck_input").value = "";
+    }
+    function Leave() {
+      let value = document.getElementById("input").value;
+      let cookiesAll = GetCookies(value)
+      let cookiesLeaveStr = document.getElementById("cookie_input").value;
+      const nameCoockiesLeave = cookiesLeaveStr.split(",").map(o => o.trim());
+      let difference = cookiesAll.cookieNames.filter(x => !nameCoockiesLeave.includes(x));
+      RemoveCookies(difference);
+    }
 
-        const nameCoockies = nameStrCoockies.split(",");
-        document.getElementById("comments").innerHTML = "Удалены куки: ";
-        const removed = [];
-        nameCoockies.forEach((nameCoockie) => {
-          const findRegexp = new RegExp(`${nameCoockie.trim()}=(.*?)(;|\n)`, "g");
-          const findMatch = findRegexp.exec(value);
-          if (findMatch) {
-            const findText = findMatch[0];
-            value = value.replace(findText.replace("\n", ""), "");
-            removed.push(nameCoockie);
+    function Remove() {
+      const nameStrCookies = document.getElementById("cookie_input").value;
+      const nameCoockies = nameStrCookies.split(",");
+      RemoveCookies(nameCoockies);
+    }
+    function RemoveCookies(nameCoockies) {
+      let value = document.getElementById("input").value;
+
+      const removed = [];
+      const leaved = [];
+      nameCoockies.forEach((nameCoockie) => {
+        const findRegexp = new RegExp(`${nameCoockie.trim()}=(.*?)(;|\n)`, "g");
+        const findMatch = findRegexp.exec(value);
+        if (findMatch) {
+          const findText = findMatch[0];
+          value = value.replace(findText.replace("\n", ""), "");
+          removed.push(nameCoockie);
+        }
+      });
+
+      document.getElementById("comments").innerHTML = "Удалены куки: " + removed.join(", ");
+      //document.getElementById("input").value = value;
+
+      const result = GetCookies(value);
+      if (result.cookies.length > 0) {
+        resultCookiesString = `Cookie:${result.cookies.join(";")}\n`;
+      } else {
+        resultCookiesString = 'Cookie:';
+      }
+
+      document.getElementById("output").value = resultCookiesString;
+      document.getElementById("comments2").innerHTML = "Остались куки: " + result.cookieNames.join(", ");
+
+      CopyResults()
+    }
+
+    function GetCookies(text) {
+      const result = { cookies: [], cookieNames: [], textNotCookies: text };
+      const cookieStrRegexp = /Cookie: (.*)\n/g;
+      const cookieStrMatch = cookieStrRegexp.exec(text);
+      let resultCookiesString
+      if (cookieStrMatch != null) {
+        const cookieStr = cookieStrMatch[1];
+
+        const cookiesTest = cookieStr.split(';');
+        for (cookieTest of cookiesTest) {
+          const cookieTestValues = cookieTest.split('=');
+          let cookieName = cookieTestValues[0].trim();
+          result.cookieNames.push(cookieName);
+          if (cookieTestValues.length > 1) {
+            result.cookies.push(`"${cookieName}":"${cookieTestValues[1].replaceAll('"', '\\"')}"`);
+          } else {
+            if (cookieName.length > 0) result.cookies.push(`"${cookieName}":""`);
           }
-        });
-        document.getElementById("comments").innerHTML += removed.join(", ");
-
-        document.getElementById("input").value = value;
+        }
+        result.textNotCookies = text.replace(cookieStrMatch[0], "");
       }
-	  function CopyResults() {
-	    const copyText = document.getElementById("output");
-	    copyText.select();
-	    copyText.setSelectionRange(0, 99999)
-	    document.execCommand("copy");
-	  }
+      return result;
+    }
+
+    function CopyResults() {
+      const copyText = document.getElementById("output");
+      copyText.select();
+      copyText.setSelectionRange(0, 99999)
+      document.execCommand("copy");
+    }
 
     function GetResultStringFromRequest(text) {
       const result = { request: "", linkParams: [], headers: [], cookies: [], bodyValues: [] };
@@ -131,11 +174,11 @@
 
       const linkParamsStrRegexp = /\?(.*)/g;
       const linkParamsStrMatch = linkParamsStrRegexp.exec(mainMatch[2]);
-      if(linkParamsStrMatch != null && linkParamsStrMatch[1]) {
+      if (linkParamsStrMatch != null && linkParamsStrMatch[1]) {
         const linkParamsStr = linkParamsStrMatch[1]
         const linkParamsRegexp = /(.+?)=(.*?)(&|$)/g;
         let linkParamsMatch = linkParamsRegexp.exec(linkParamsStr);
-        if (linkParamsMatch[1]){
+        if (linkParamsMatch[1]) {
           while (linkParamsMatch != null) {
             result.linkParams.push(`"${linkParamsMatch[1]}":"${linkParamsMatch[2]}"`);
             linkParamsMatch = linkParamsRegexp.exec(linkParamsStr);
@@ -148,22 +191,22 @@
       const cookieStrRegexp = /Cookie: (.*)\n/g;
       const cookieStrMatch = cookieStrRegexp.exec(text);
       let resultCookiesString
-      if(cookieStrMatch != null){
+      if (cookieStrMatch != null) {
         const cookieStr = cookieStrMatch[1];
-		
+
         const cookiesTest = cookieStr.split(';');
-        for (cookieTest of cookiesTest){
+        for (cookieTest of cookiesTest) {
           const cookieTestValues = cookieTest.split('=');
-          if (cookieTestValues.length > 1){				
-            result.cookies.push(`"${cookieTestValues[0].trim()}":"${cookieTestValues[1].replaceAll('"','\\"')}"`);
-          }else{			
+          if (cookieTestValues.length > 1) {
+            result.cookies.push(`"${cookieTestValues[0].trim()}":"${cookieTestValues[1].replaceAll('"', '\\"')}"`);
+          } else {
             result.cookies.push(`"${cookieTestValues[0].trim()}":""`);
           }
         }
         resultCookiesString = `,\n"Cookies":\n{\n${result.cookies.join(",\n")}\n}\n`;
         text = text.replace(cookieStrMatch[0], "");
       } else {
-        resultCookiesString=',\n"Cookies":\n{\n}\n';
+        resultCookiesString = ',\n"Cookies":\n{\n}\n';
       }
 
       const headersStrRegexp = /HTTP\/1\.1((.|\n)+?)\n(\n|$)/g;
@@ -171,10 +214,10 @@
       const headersStr = headersStrMatch[1];
       const headersRegexp = /(.+?): (.+)/g;
       let headersMatch = headersRegexp.exec(headersStr);
-      const autoCreatedHeaders = ["Connection", "User-Agent", "sec-ch-ua", "sec-ch-ua-mobile", "sec-ch-ua-platform", "Accept-Language", "Accept-Encoding", "Origin"];
+      const autoCreatedHeaders = ["Connection", "User-Agent", "sec-ch-ua", "sec-ch-ua-mobile", "sec-ch-ua-platform", "Accept-Language", "Accept-Encoding"];
       const removeAutoCreatedHeaders = document.getElementById("autoCreatedHeaders").checked;
       while (headersMatch != null) {
-        if(!removeAutoCreatedHeaders || !autoCreatedHeaders.includes(headersMatch[1])){
+        if (!removeAutoCreatedHeaders || !autoCreatedHeaders.includes(headersMatch[1])) {
           result.headers.push(
             `"${headersMatch[1]}":"${headersMatch[2].replaceAll('"', '\\"')}"`
           );
@@ -189,7 +232,7 @@
       const bodyMainMatch = bodyRegexp.exec(text);
       if (bodyMainMatch != null && bodyMainMatch[1]) {
         const val = bodyMainMatch[1].trim();
-        
+
         /*const bodyValueRegexp = /(.+?)=(.*?)(&|$)/g;
         let bodyValueMatch = bodyValueRegexp.exec(val);
         if (bodyValueMatch != null){
@@ -218,46 +261,46 @@
       // }
 
       let topText = hasBody ? text.slice(0, bodyMainMatch.index) : text;
-      
+
       const resultRegexp = /HTTP\/1\.1 ?(.+)$/gm;
       const resultMatch = resultRegexp.exec(topText);
       resultString += `"Result":\n"${resultMatch[1].trim()}"\n`;
 
       const setCookiesRegexp = /^Set-Cookie: ?(.+?)=(.+)$/gm;
-      let setCookiesMatch = setCookiesRegexp.exec(topText);     
-      let cookies = []; 
+      let setCookiesMatch = setCookiesRegexp.exec(topText);
+      let cookies = [];
       while (setCookiesMatch != null) {
-        cookies.push(`"${setCookiesMatch[1].trim()}":"${setCookiesMatch[2].replaceAll('"','\\"')}"`);
+        cookies.push(`"${setCookiesMatch[1].trim()}":"${setCookiesMatch[2].replaceAll('"', '\\"')}"`);
         //topText = topText.slice(0, setCookiesMatch.index) + topText.slice(setCookiesMatch.index+setCookiesMatch[0].length+1);
         setCookiesMatch = setCookiesRegexp.exec(topText);
       }
-      if (cookies.length !== 0){
+      if (cookies.length !== 0) {
         topText = topText.replaceAll(setCookiesRegexp, '');
         topText = topText.replaceAll(duplicateNewLineRegexp, '\n');
         resultString += `,"Set-Cookies":\n{\n${cookies.join(",\n")}\n}\n`;
       }
 
       const headersRegexp = /^(.+?): ?(.+)$/gm;
-      let headersMatch = headersRegexp.exec(topText);     
-      let headers = []; 
+      let headersMatch = headersRegexp.exec(topText);
+      let headers = [];
       while (headersMatch != null) {
-        headers.push(`"${headersMatch[1].trim()}":"${headersMatch[2].replaceAll('"','\\"')}"`);
+        headers.push(`"${headersMatch[1].trim()}":"${headersMatch[2].replaceAll('"', '\\"')}"`);
         //topText = topText.slice(0, headersMatch.index) + topText.slice(headersMatch.index+headersMatch[0].length+1);
         headersMatch = headersRegexp.exec(topText);
       }
-      if (headers.length !== 0){
+      if (headers.length !== 0) {
         topText = topText.replaceAll(headersRegexp, '');
         topText = topText.replaceAll(duplicateNewLineRegexp, '\n');
         resultString += `,"Headers":\n{\n${headers.join(",\n")}\n}\n`;
       }
 
-      if (hasBody) 
+      if (hasBody)
         resultString += `,"Body":\n${bodyMainMatch[1].trim()}\n`;
 
       const other = topText.split('\n)');
-      if(other.length>2){
+      if (other.length > 2) {
         let others = [];
-        for(let i = 1; i < other.length-1; i++){
+        for (let i = 1; i < other.length - 1; i++) {
           others.push(`"${i}":"${other[i]}"`);
         }
         resultString += `,"Other":\n{\n${others.join(",\n")}\n}\n`;
@@ -266,7 +309,8 @@
       resultString += "}";
       return resultString;
     }
-   
-    </script>
-  </body>
+
+  </script>
+</body>
+
 </html>
