@@ -122,7 +122,7 @@
 
       const result = GetCookies(value);
       if (result.cookies.length > 0) {
-        resultCookiesString = `Cookie:${result.cookies.join(";")}\n`;
+        resultCookiesString = `Cookie:${result.cookiesNotFormat.join("; ")}\n`;
       } else {
         resultCookiesString = 'Cookie:';
       }
@@ -134,7 +134,7 @@
     }
 
     function GetCookies(text) {
-      const result = { cookies: [], cookieNames: [], textNotCookies: text };
+      const result = { cookies: [], cookiesNotFormat: [], cookieNames: [], textNotCookies: text };
       const cookieStrRegexp = /Cookie: (.*)\n/g;
       const cookieStrMatch = cookieStrRegexp.exec(text);
       let resultCookiesString
@@ -146,6 +146,7 @@
           const cookieTestValues = cookieTest.split('=');
           let cookieName = cookieTestValues[0].trim();
           result.cookieNames.push(cookieName);
+          result.cookiesNotFormat.push(cookieTest);
           if (cookieTestValues.length > 1) {
             result.cookies.push(`"${cookieName}":"${cookieTestValues[1].replaceAll('"', '\\"')}"`);
           } else {
