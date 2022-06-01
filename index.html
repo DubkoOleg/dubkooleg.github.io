@@ -233,16 +233,21 @@
       if (bodyMainMatch != null && bodyMainMatch[1]) {
         const val = bodyMainMatch[1].trim();
 
-        /*const bodyValueRegexp = /(.+?)=(.*?)(&|$)/g;
-        let bodyValueMatch = bodyValueRegexp.exec(val);
-        if (bodyValueMatch != null){
-          while (bodyValueMatch != null) {
-            result.bodyValues.push(`"${bodyValueMatch[1].trim()}":"${bodyValueMatch[2].replaceAll('"','\\"')}"`);
-            bodyValueMatch = bodyValueRegexp.exec(val);
+        if (headersStr.includes('x-www-form-urlencoded')) {
+          const bodyUrlencodedRegexp = /([^&].+?)=([^&#]*|&|#|$)/g;
+          let bodyUrlencodedMatch = bodyUrlencodedRegexp.exec(val);
+          let bodyUrlencodedValues = [];
+          if (bodyUrlencodedMatch != null) {
+            while (bodyUrlencodedMatch != null) {
+              result.bodyValues.push(`"${bodyUrlencodedMatch[1].trim()}":"${bodyUrlencodedMatch[2].replaceAll('"', '\\"')}"`);
+              bodyUrlencodedMatch = bodyUrlencodedRegexp.exec(val);
+            }
+            resultString += `,\n"BodyValues":\n{\n${result.bodyValues.join(",\n")}\n}\n`;
           }
-          resultString += `,\n"BodyValues":\n{\n${result.bodyValues.join(",\n")}\n}\n`;
-        }*/
-        resultString += `,\n"Body":\n${val[0] == "{" ? val : `"${val}"`}`;
+        } else {
+          resultString += `,\n"Body":\n${val[0] == "{" || val[0] == "[" ? val : `"${val}"`}`;
+        }
+
       }
 
       resultString += "}";
